@@ -30,6 +30,10 @@
       margin: 0;
       color: #ffffff;
       animation: floatTitle 3s ease-in-out infinite alternate;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     @keyframes floatTitle {
@@ -92,16 +96,41 @@
       animation-delay: 15s;
     }
 
+    /* Sol y Luna */
+    .icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+      animation: spin 20s linear infinite;
+    }
+
+    .sun {
+      background: radial-gradient(circle, #ffeb3b 40%, #ff9800 100%);
+      box-shadow: 0 0 25px rgba(255, 193, 7, 0.8);
+    }
+
+    .moon {
+      background: radial-gradient(circle, #f1f1f1 60%, #c0c0c0 100%);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     footer {
       position: absolute;
       bottom: 0;
       width: 100%;
-      background: rgba(0, 0, 50, 0.5);
+      background: #000;
       text-align: center;
       padding: 10px 0;
       font-size: 1rem;
       font-family: 'Raleway', sans-serif;
-      color: #f1f1f1;
+      color: #fff;
       z-index: 3;
       letter-spacing: 0.5px;
     }
@@ -114,6 +143,10 @@
     @media (max-width: 600px) {
       h1 {
         font-size: 3.5rem;
+      }
+      .icon {
+        width: 40px;
+        height: 40px;
       }
       footer {
         font-size: 0.85rem;
@@ -128,11 +161,25 @@
   <div class="cloud"></div>
   <div class="cloud"></div>
 
-  <h1>MaxiMET</h1>
+  <h1>
+    Maxi<span id="met">MET</span>
+    <span id="weatherIcon" class="icon"></span>
+  </h1>
 
   <footer>
     En construcción con <span class="heart">❤</span> por Maxi
   </footer>
+
+  <script>
+    // Detectar si es de día o de noche
+    const hour = new Date().getHours();
+    const icon = document.getElementById("weatherIcon");
+
+    if (hour >= 7 && hour < 19) {
+      icon.classList.add("sun");
+    } else {
+      icon.classList.add("moon");
+    }
+  </script>
 </body>
 </html>
-
