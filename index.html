@@ -42,10 +42,10 @@
       100% { transform: translateY(-10px); }
     }
 
-    /* Fondo animado con nubes estilo cómic */
+    /* Nubes animadas */
     @keyframes moveClouds {
       0% { transform: translateX(-200px); }
-      100% { transform: translateX(100vw); }
+      100% { transform: translateX(110vw); }
     }
 
     .cloud {
@@ -53,49 +53,10 @@
       background: #fff;
       border: 2px solid #d0d0d0;
       border-radius: 50%;
-      box-shadow:
-        40px 20px 0 0 #fff,
-        80px 25px 0 0 #fff,
-        120px 15px 0 0 #fff;
-      animation: moveClouds linear infinite;
       opacity: 0.9;
+      animation: moveClouds linear infinite;
       filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2));
       transition: opacity 1.5s ease;
-    }
-
-    .cloud:nth-child(1) {
-      top: 20%;
-      left: -200px;
-      width: 80px;
-      height: 50px;
-      animation-duration: 60s;
-    }
-
-    .cloud:nth-child(2) {
-      top: 40%;
-      left: -300px;
-      width: 120px;
-      height: 70px;
-      animation-duration: 80s;
-      animation-delay: 5s;
-    }
-
-    .cloud:nth-child(3) {
-      top: 65%;
-      left: -250px;
-      width: 100px;
-      height: 60px;
-      animation-duration: 70s;
-      animation-delay: 10s;
-    }
-
-    .cloud:nth-child(4) {
-      top: 30%;
-      left: -350px;
-      width: 150px;
-      height: 80px;
-      animation-duration: 90s;
-      animation-delay: 15s;
     }
 
     /* Sol y Luna */
@@ -158,12 +119,6 @@
   </style>
 </head>
 <body>
-  <!-- Nubes decorativas -->
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-
   <h1>
     Maxi<span id="met">MET</span>
     <span id="weatherIcon" class="icon"></span>
@@ -174,21 +129,56 @@
   </footer>
 
   <script>
+    const body = document.body;
     const hour = new Date().getHours();
     const icon = document.getElementById("weatherIcon");
-    const body = document.body;
-    const clouds = document.querySelectorAll(".cloud");
 
+    // Fondo según hora
     if (hour >= 7 && hour < 19) {
-      // Día
       icon.classList.add("sun");
       body.style.background = "linear-gradient(180deg, #74b9ff, #a9c9ff, #dfe6e9)";
-      clouds.forEach(cloud => cloud.style.opacity = "0.9");
     } else {
-      // Noche
       icon.classList.add("moon");
       body.style.background = "radial-gradient(circle at 30% 20%, #1a1a40, #0a0a1a)";
-      clouds.forEach(cloud => cloud.style.opacity = "0.4");
+    }
+
+    // Generar nubes con formas y tamaños distintos
+    const numNubes = 8;
+
+    for (let i = 0; i < numNubes; i++) {
+      const nube = document.createElement("div");
+      nube.classList.add("cloud");
+
+      // Tamaño aleatorio
+      const width = 80 + Math.random() * 120;
+      const height = width * (0.5 + Math.random() * 0.3);
+      nube.style.width = `${width}px`;
+      nube.style.height = `${height}px`;
+
+      // Posición aleatoria
+      const top = Math.random() * 70 + 5; // margen superior
+      nube.style.top = `${top}%`;
+      nube.style.left = `${-200 - Math.random() * 400}px`;
+
+      // Movimiento aleatorio
+      const duracion = 50 + Math.random() * 60;
+      nube.style.animationDuration = `${duracion}s`;
+      nube.style.animationDelay = `${Math.random() * 20}s`;
+
+      // Bordes de nube tipo cómic
+      nube.style.borderRadius = `${40 + Math.random() * 30}% / ${50 + Math.random() * 30}%`;
+      nube.style.boxShadow = `
+        ${30 + Math.random() * 50}px ${10 + Math.random() * 20}px 0 0 #fff,
+        ${70 + Math.random() * 60}px ${15 + Math.random() * 25}px 0 0 #fff,
+        ${110 + Math.random() * 40}px ${10 + Math.random() * 25}px 0 0 #fff
+      `;
+
+      // Opacidad más baja de noche
+      if (hour >= 19 || hour < 7) {
+        nube.style.opacity = "0.4";
+      }
+
+      body.appendChild(nube);
     }
   </script>
 </body>
