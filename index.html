@@ -21,7 +21,16 @@
       position: relative;
     }
 
-    /* Fondo animado */
+    h1 {
+      font-size: 5rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      z-index: 3;
+      margin: 0;
+    }
+
+    /* Nubes decorativas */
     @keyframes floatClouds {
       0% { transform: translateX(-200px); }
       100% { transform: translateX(100vw); }
@@ -39,7 +48,7 @@
     }
 
     .cloud:nth-child(1) {
-      top: 20%;
+      top: 15%;
       left: -200px;
       width: 80px;
       height: 50px;
@@ -47,7 +56,7 @@
     }
 
     .cloud:nth-child(2) {
-      top: 50%;
+      top: 45%;
       left: -300px;
       width: 100px;
       height: 60px;
@@ -64,26 +73,53 @@
       animation-delay: 5s;
     }
 
-    h1 {
-      font-size: 5rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-      z-index: 2;
-      margin: 0;
-    }
-
+    /* Pie de página */
     footer {
       position: absolute;
-      bottom: 10px;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0, 0, 50, 0.5);
+      text-align: center;
+      padding: 8px 0;
       font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.85);
-      z-index: 2;
+      color: #f1f1f1;
+      z-index: 3;
     }
 
     footer .heart {
       color: #ff4d6d;
       font-size: 1rem;
+    }
+
+    /* Zona del juego */
+    #game {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      overflow: hidden;
+      background: transparent;
+      z-index: 2;
+    }
+
+    #player {
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      font-size: 2.5rem;
+      transition: bottom 0.2s;
+    }
+
+    .obstacle {
+      position: absolute;
+      bottom: 0;
+      right: -60px;
+      font-size: 2.5rem;
+      animation: moveObstacle 3s linear infinite;
+    }
+
+    @keyframes moveObstacle {
+      0% { right: -60px; }
+      100% { right: 100vw; }
     }
 
     @media (max-width: 600px) {
@@ -97,15 +133,62 @@
   </style>
 </head>
 <body>
+  <!-- Nubes decorativas -->
   <div class="cloud"></div>
   <div class="cloud"></div>
   <div class="cloud"></div>
 
   <h1>MaxiMET</h1>
 
+  <!-- Juego -->
+  <div id="game">
+    <div id="player">☁️</div>
+    <div class="obstacle">🌥️</div>
+  </div>
+
   <footer>
     En construcción con <span class="heart">❤</span> por Maxi
   </footer>
+
+  <script>
+    const player = document.getElementById("player");
+    const obstacle = document.querySelector(".obstacle");
+    let jumping = false;
+
+    // Control del salto
+    document.body.onkeydown = function(e) {
+      if (e.code === "Space" && !jumping) {
+        jumping = true;
+        let jumpHeight = 0;
+        const jumpInterval = setInterval(() => {
+          if (jumpHeight >= 100) {
+            clearInterval(jumpInterval);
+            const fallInterval = setInterval(() => {
+              if (jumpHeight <= 0) {
+                clearInterval(fallInterval);
+                jumping = false;
+              }
+              jumpHeight -= 10;
+              player.style.bottom = jumpHeight + "px";
+            }, 20);
+          } else {
+            jumpHeight += 10;
+            player.style.bottom = jumpHeight + "px";
+          }
+        }, 20);
+      }
+    };
+
+    // Colisión simple
+    setInterval(() => {
+      const playerBottom = parseInt(window.getComputedStyle(player).bottom);
+      const obstacleRight = parseInt(window.getComputedStyle(obstacle).right);
+
+      if (obstacleRight > window.innerWidth - 130 && obstacleRight < window.innerWidth - 50 && playerBottom < 40) {
+        alert("💥 ¡Has chocado! Pulsa aceptar para reiniciar.");
+        location.reload();
+      }
+    }, 10);
+  </script>
 </body>
 </html>
-
