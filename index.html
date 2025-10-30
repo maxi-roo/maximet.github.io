@@ -30,7 +30,7 @@
       margin: 0;
     }
 
-    /* Nubes decorativas */
+    /* Nubes decorativas de fondo */
     @keyframes floatClouds {
       0% { transform: translateX(-200px); }
       100% { transform: translateX(100vw); }
@@ -112,9 +112,9 @@
     .obstacle {
       position: absolute;
       bottom: 0;
-      right: -60px;
       font-size: 2.5rem;
-      animation: moveObstacle 3s linear infinite;
+      right: -60px;
+      animation: moveObstacle linear forwards;
     }
 
     @keyframes moveObstacle {
@@ -143,7 +143,6 @@
   <!-- Juego -->
   <div id="game">
     <div id="player">☁️</div>
-    <div class="obstacle">🌥️</div>
   </div>
 
   <footer>
@@ -152,16 +151,16 @@
 
   <script>
     const player = document.getElementById("player");
-    const obstacle = document.querySelector(".obstacle");
+    const game = document.getElementById("game");
     let jumping = false;
     let velocity = 0;
     let position = 0;
 
-    // Parámetros ajustados del salto
-    const gravity = 0.9;       // gravedad más fuerte → caída más rápida
-    const jumpForce = 16;      // más fuerza de salto
-    const frameRate = 16;      // más fluido (60fps aprox)
-    const maxHeight = 140;     // altura máxima del salto
+    // Parámetros del salto ajustados
+    const gravity = 1.2;
+    const jumpForce = 14;
+    const frameRate = 16;
+    const maxHeight = 100;
 
     document.body.onkeydown = function(e) {
       if (e.code === "Space" && !jumping) {
@@ -175,7 +174,7 @@
         position += velocity;
         velocity -= gravity;
 
-        if (position < 0) {
+        if (position <= 0) {
           position = 0;
           jumping = false;
         }
@@ -187,20 +186,56 @@
 
     setInterval(updateJump, frameRate);
 
-    // Detección de colisiones
-    setInterval(() => {
-      const playerBottom = parseInt(window.getComputedStyle(player).bottom);
-      const obstacleRight = parseInt(window.getComputedStyle(obstacle).right);
+    // Generar nubes aleatorias
+    function createObstacle() {
+      const obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
 
-      if (
-        obstacleRight > window.innerWidth - 130 &&
-        obstacleRight < window.innerWidth - 50 &&
-        playerBottom < 40
-      ) {
-        alert("💥 ¡Has chocado! Pulsa aceptar para reiniciar.");
-        location.reload();
-      }
-    }, 10);
+      // Tamaño y velocidad aleatoria
+      const sizes = ["2rem", "2.5rem", "3rem"];
+      obstacle.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)];
+
+      // Posición vertical aleatoria (solo un poco)
+      const bottomOffset = Math.floor(Math.random() * 15);
+      obstacle.style.bottom = bottomOffset + "px";
+
+      obstacle.textContent = "🌥️";
+
+      // Duración aleatoria entre 2.5 y 4.5 segundos
+      const duration = (Math.random() * 2 + 2.5).toFixed(1);
+      obstacle.style.animationDuration = duration + "s";
+
+      game.appendChild(obstacle);
+
+      // Detectar colisión
+      const collisionCheck = setInterval(() => {
+        const playerBottom = parseInt(window.getComputedStyle(player).bottom);
+        const obstacleRect = obstacle.getBoundingClientRect();
+        const playerRect = player.getBoundingClientRect();
+
+        if (
+          obstacleRect.left < playerRect.right - 30 &&
+          obstacleRect.right > playerRect.left + 20 &&
+          playerBottom < 40
+        ) {
+          alert("💥 ¡Has chocado! Pulsa aceptar para reiniciar.");
+          location.reload();
+        }
+      }, 20);
+
+      // Eliminar obstáculo al salir de la pantalla
+      obstacle.addEventListener("animationend", () => {
+        clearInterval(collisionCheck);
+        obstacle.remove();
+      });
+
+      // Crear la siguiente nube tras un tiempo aleatorio
+      const nextTime = Math.random() * 2000 + 1200;
+      setTimeout(createObstacle, nextTime);
+    }
+
+    // Iniciar la primera nube
+    setTimeout(createObstacle, 1500);
   </script>
 </body>
 </html>
