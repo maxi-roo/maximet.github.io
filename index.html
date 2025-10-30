@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MaxiMET</title>
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Fuente estilo cómic -->
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -15,40 +16,49 @@
       justify-content: center;
       align-items: center;
       background: linear-gradient(180deg, #74b9ff, #a9c9ff, #dfe6e9);
-      font-family: 'Raleway', sans-serif;
+      font-family: 'Bangers', cursive;
       color: #fff;
       text-align: center;
       position: relative;
     }
 
     h1 {
-      font-size: 5rem;
-      font-weight: 700;
+      font-size: 6rem;
       letter-spacing: 3px;
-      text-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      text-shadow: 3px 3px 0px #0056a3, 6px 6px 0px rgba(0, 0, 0, 0.2);
       z-index: 3;
       margin: 0;
+      color: #ffffff;
+      animation: floatTitle 3s ease-in-out infinite alternate;
     }
 
-    /* Nubes decorativas de fondo */
-    @keyframes floatClouds {
+    @keyframes floatTitle {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+
+    /* Fondo animado con nubes estilo cómic */
+    @keyframes moveClouds {
       0% { transform: translateX(-200px); }
       100% { transform: translateX(100vw); }
     }
 
     .cloud {
       position: absolute;
-      background: rgba(255, 255, 255, 0.9);
+      background: #fff;
+      border: 2px solid #d0d0d0;
       border-radius: 50%;
-      box-shadow: 40px 20px 0 0 rgba(255, 255, 255, 0.9),
-                  80px 25px 0 0 rgba(255, 255, 255, 0.9),
-                  120px 15px 0 0 rgba(255, 255, 255, 0.9);
-      animation: floatClouds linear infinite;
-      opacity: 0.9;
+      box-shadow:
+        40px 20px 0 0 #fff,
+        80px 25px 0 0 #fff,
+        120px 15px 0 0 #fff;
+      animation: moveClouds linear infinite;
+      opacity: 0.95;
+      filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2));
     }
 
     .cloud:nth-child(1) {
-      top: 15%;
+      top: 20%;
       left: -200px;
       width: 80px;
       height: 50px;
@@ -56,34 +66,44 @@
     }
 
     .cloud:nth-child(2) {
-      top: 45%;
+      top: 40%;
       left: -300px;
-      width: 100px;
-      height: 60px;
-      animation-duration: 90s;
-      animation-delay: 10s;
-    }
-
-    .cloud:nth-child(3) {
-      top: 70%;
-      left: -250px;
       width: 120px;
       height: 70px;
-      animation-duration: 75s;
+      animation-duration: 80s;
       animation-delay: 5s;
     }
 
-    /* Pie de página */
+    .cloud:nth-child(3) {
+      top: 65%;
+      left: -250px;
+      width: 100px;
+      height: 60px;
+      animation-duration: 70s;
+      animation-delay: 10s;
+    }
+
+    .cloud:nth-child(4) {
+      top: 30%;
+      left: -350px;
+      width: 150px;
+      height: 80px;
+      animation-duration: 90s;
+      animation-delay: 15s;
+    }
+
     footer {
       position: absolute;
       bottom: 0;
       width: 100%;
       background: rgba(0, 0, 50, 0.5);
       text-align: center;
-      padding: 8px 0;
-      font-size: 0.9rem;
+      padding: 10px 0;
+      font-size: 1rem;
+      font-family: 'Raleway', sans-serif;
       color: #f1f1f1;
       z-index: 3;
+      letter-spacing: 0.5px;
     }
 
     footer .heart {
@@ -91,43 +111,12 @@
       font-size: 1rem;
     }
 
-    /* Zona del juego */
-    #game {
-      position: relative;
-      width: 100%;
-      height: 150px;
-      overflow: hidden;
-      background: transparent;
-      z-index: 2;
-    }
-
-    #player {
-      position: absolute;
-      bottom: 0;
-      left: 50px;
-      font-size: 2.5rem;
-      transition: bottom 0.05s linear;
-    }
-
-    .obstacle {
-      position: absolute;
-      bottom: 0;
-      font-size: 2.5rem;
-      right: -60px;
-      animation: moveObstacle linear forwards;
-    }
-
-    @keyframes moveObstacle {
-      0% { right: -60px; }
-      100% { right: 100vw; }
-    }
-
     @media (max-width: 600px) {
       h1 {
-        font-size: 3rem;
+        font-size: 3.5rem;
       }
       footer {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
       }
     }
   </style>
@@ -137,105 +126,13 @@
   <div class="cloud"></div>
   <div class="cloud"></div>
   <div class="cloud"></div>
+  <div class="cloud"></div>
 
   <h1>MaxiMET</h1>
-
-  <!-- Juego -->
-  <div id="game">
-    <div id="player">☁️</div>
-  </div>
 
   <footer>
     En construcción con <span class="heart">❤</span> por Maxi
   </footer>
-
-  <script>
-    const player = document.getElementById("player");
-    const game = document.getElementById("game");
-    let jumping = false;
-    let velocity = 0;
-    let position = 0;
-
-    // Parámetros del salto ajustados
-    const gravity = 1.2;
-    const jumpForce = 14;
-    const frameRate = 16;
-    const maxHeight = 100;
-
-    document.body.onkeydown = function(e) {
-      if (e.code === "Space" && !jumping) {
-        jumping = true;
-        velocity = jumpForce;
-      }
-    };
-
-    function updateJump() {
-      if (jumping) {
-        position += velocity;
-        velocity -= gravity;
-
-        if (position <= 0) {
-          position = 0;
-          jumping = false;
-        }
-
-        if (position > maxHeight) position = maxHeight;
-        player.style.bottom = position + "px";
-      }
-    }
-
-    setInterval(updateJump, frameRate);
-
-    // Generar nubes aleatorias
-    function createObstacle() {
-      const obstacle = document.createElement("div");
-      obstacle.classList.add("obstacle");
-
-      // Tamaño y velocidad aleatoria
-      const sizes = ["2rem", "2.5rem", "3rem"];
-      obstacle.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)];
-
-      // Posición vertical aleatoria (solo un poco)
-      const bottomOffset = Math.floor(Math.random() * 15);
-      obstacle.style.bottom = bottomOffset + "px";
-
-      obstacle.textContent = "🌥️";
-
-      // Duración aleatoria entre 2.5 y 4.5 segundos
-      const duration = (Math.random() * 2 + 2.5).toFixed(1);
-      obstacle.style.animationDuration = duration + "s";
-
-      game.appendChild(obstacle);
-
-      // Detectar colisión
-      const collisionCheck = setInterval(() => {
-        const playerBottom = parseInt(window.getComputedStyle(player).bottom);
-        const obstacleRect = obstacle.getBoundingClientRect();
-        const playerRect = player.getBoundingClientRect();
-
-        if (
-          obstacleRect.left < playerRect.right - 30 &&
-          obstacleRect.right > playerRect.left + 20 &&
-          playerBottom < 40
-        ) {
-          alert("💥 ¡Has chocado! Pulsa aceptar para reiniciar.");
-          location.reload();
-        }
-      }, 20);
-
-      // Eliminar obstáculo al salir de la pantalla
-      obstacle.addEventListener("animationend", () => {
-        clearInterval(collisionCheck);
-        obstacle.remove();
-      });
-
-      // Crear la siguiente nube tras un tiempo aleatorio
-      const nextTime = Math.random() * 2000 + 1200;
-      setTimeout(createObstacle, nextTime);
-    }
-
-    // Iniciar la primera nube
-    setTimeout(createObstacle, 1500);
-  </script>
 </body>
 </html>
+
