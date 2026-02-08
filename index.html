@@ -1,185 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MaxiMET</title>
-  <!-- Fuente estilo cómic -->
-  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(180deg, #74b9ff, #a9c9ff, #dfe6e9);
-      font-family: 'Bangers', cursive;
-      color: #fff;
-      text-align: center;
-      position: relative;
-      transition: background 2s ease;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviation Weather Tool</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
 
-    h1 {
-      font-size: 6rem;
-      letter-spacing: 3px;
-      text-shadow: 3px 3px 0px #0056a3, 6px 6px 0px rgba(0, 0, 0, 0.2);
-      z-index: 3;
-      margin: 0;
-      color: #ffffff;
-      animation: floatTitle 3s ease-in-out infinite alternate;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
 
-    @keyframes floatTitle {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-10px); }
-    }
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
 
-    /* Nubes animadas */
-    @keyframes moveClouds {
-      0% { transform: translateX(-200px); }
-      100% { transform: translateX(110vw); }
-    }
+        h2 { margin-top: 0; color: var(--primary); font-weight: 600; }
 
-    .cloud {
-      position: absolute;
-      background: #fff;
-      border: 2px solid #d0d0d0;
-      border-radius: 50%;
-      opacity: 0.9;
-      animation: moveClouds linear infinite;
-      filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.2));
-      transition: opacity 1.5s ease;
-    }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
 
-    /* Sol y Luna */
-    .icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
-      animation: spin 20s linear infinite;
-      transition: all 1s ease;
-    }
+        input[type="text"], select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
 
-    .sun {
-      background: radial-gradient(circle, #ffeb3b 40%, #ff9800 100%);
-      box-shadow: 0 0 25px rgba(255, 193, 7, 0.8);
-    }
+        input[type="text"] { width: 120px; text-transform: uppercase; }
 
-    .moon {
-      background: radial-gradient(circle, #f1f1f1 60%, #c0c0c0 100%);
-      box-shadow: 0 0 25px rgba(200, 200, 255, 0.8);
-    }
+        .checkbox-group {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
 
-    footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: #000;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 1rem;
-      font-family: 'Raleway', sans-serif;
-      color: #fff;
-      z-index: 3;
-      letter-spacing: 0.5px;
-    }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
 
-    footer .heart {
-      color: #ff4d6d;
-      font-size: 1rem;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 3.5rem;
-      }
-      .icon {
-        width: 40px;
-        height: 40px;
-      }
-      footer {
-        font-size: 0.85rem;
-      }
-    }
-  </style>
+        #output {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #27272a;
+            color: #10b981;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            resize: vertical;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-  <h1>
-    Maxi<span id="met">MET</span>
-    <span id="weatherIcon" class="icon"></span>
-  </h1>
 
-  <footer>
-    En construcción con <span class="heart">❤</span> por Maxi
-  </footer>
+<div class="container">
+    <h2>Consulta Meteorológica Aeronáutica</h2>
+    
+    <div class="toolbar">
+        <input type="text" id="icao" placeholder="Ej: GCXO" maxlength="4">
 
-  <script>
-    const body = document.body;
-    const hour = new Date().getHours();
-    const icon = document.getElementById("weatherIcon");
+        <select id="hours">
+            <option value="0">Más reciente</option>
+            <option value="1">Última hora</option>
+            <option value="3">Últimas 3 horas</option>
+            <option value="6">Últimas 6 horas</option>
+            <option value="12">Últimas 12 horas</option>
+            <option value="24">Últimas 24 horas</option>
+        </select>
 
-    // Fondo según hora
-    if (hour >= 7 && hour < 19) {
-      icon.classList.add("sun");
-      body.style.background = "linear-gradient(180deg, #74b9ff, #a9c9ff, #dfe6e9)";
-    } else {
-      icon.classList.add("moon");
-      body.style.background = "radial-gradient(circle at 30% 20%, #1a1a40, #0a0a1a)";
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="checkMetar" checked> METAR</label>
+            <label><input type="checkbox" id="checkTaf"> TAF</label>
+        </div>
+
+        <button class="btn-primary" onclick="fetchData()">Cargar</button>
+        <button class="btn-secondary" onclick="showUrl()">Raw (URL)</button>
+    </div>
+
+    <textarea id="output" readonly placeholder="Los datos aparecerán aquí..."></textarea>
+</div>
+
+<script>
+    function buildUrl() {
+        const icao = document.getElementById('icao').value.toUpperCase().trim();
+        const hours = document.getElementById('hours').value;
+        const tafActive = document.getElementById('checkTaf').checked;
+        const metarActive = document.getElementById('checkMetar').checked;
+
+        if (!icao) {
+            alert("Por favor, introduce un código ICAO.");
+            return null;
+        }
+
+        // Si METAR no está marcado pero TAF sí, la API requiere ajustes, 
+        // pero siguiendo tu lógica de ejemplo:
+        return `https://aviationweather.gov/api/data/metar?ids=${icao}&format=raw&taf=${tafActive}&hours=${hours}`;
     }
 
-    // Generar nubes con formas y tamaños distintos
-    const numNubes = 8;
+    async function fetchData() {
+        const url = buildUrl();
+        if (!url) return;
 
-    for (let i = 0; i < numNubes; i++) {
-      const nube = document.createElement("div");
-      nube.classList.add("cloud");
+        const output = document.getElementById('output');
+        output.value = "Cargando...";
 
-      // Tamaño aleatorio
-      const width = 80 + Math.random() * 120;
-      const height = width * (0.5 + Math.random() * 0.3);
-      nube.style.width = `${width}px`;
-      nube.style.height = `${height}px`;
-
-      // Posición aleatoria
-      const top = Math.random() * 70 + 5; // margen superior
-      nube.style.top = `${top}%`;
-      nube.style.left = `${-200 - Math.random() * 400}px`;
-
-      // Movimiento aleatorio
-      const duracion = 50 + Math.random() * 60;
-      nube.style.animationDuration = `${duracion}s`;
-      nube.style.animationDelay = `${Math.random() * 20}s`;
-
-      // Bordes de nube tipo cómic
-      nube.style.borderRadius = `${40 + Math.random() * 30}% / ${50 + Math.random() * 30}%`;
-      nube.style.boxShadow = `
-        ${30 + Math.random() * 50}px ${10 + Math.random() * 20}px 0 0 #fff,
-        ${70 + Math.random() * 60}px ${15 + Math.random() * 25}px 0 0 #fff,
-        ${110 + Math.random() * 40}px ${10 + Math.random() * 25}px 0 0 #fff
-      `;
-
-      // Opacidad más baja de noche
-      if (hour >= 19 || hour < 7) {
-        nube.style.opacity = "0.4";
-      }
-
-      body.appendChild(nube);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Error en la respuesta del servidor");
+            const data = await response.text();
+            output.value = data || "No se encontraron datos para esta consulta.";
+        } catch (error) {
+            output.value = "Error: " + error.message;
+        }
     }
-  </script>
+
+    function showUrl() {
+        const url = buildUrl();
+        if (url) {
+            document.getElementById('output').value = "URL de la consulta:\n" + url;
+        }
+    }
+</script>
+
 </body>
 </html>
