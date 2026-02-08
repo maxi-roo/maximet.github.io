@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviation Weather Fetcher</title>
+    <title>Aviation Weather - Fix CORS</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #38bdf8;
+            --primary: #3b82f6;
+            --bg: #111827;
+            --card: #1f2937;
+            --text: #f3f4f6;
+            --accent: #10b981;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             display: flex;
@@ -27,99 +27,94 @@
             background-color: var(--card);
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
         }
 
-        h2 { margin-top: 0; color: var(--accent); font-weight: 300; }
-
-        /* Controles superiores */
         .controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
             border-radius: 8px;
+            border: 1px solid #374151;
         }
 
         input[type="text"], select {
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid #475569;
-            background: #0f172a;
+            border: 1px solid #4b5563;
+            background: #111827;
             color: white;
             outline: none;
         }
 
-        input[type="text"] { width: 120px; text-transform: uppercase; font-weight: bold; }
+        input[type="text"] { width: 100px; text-transform: uppercase; font-weight: bold; text-align: center; }
 
         .checkbox-group {
             display: flex;
-            gap: 10px;
-            align-items: center;
-            font-size: 0.9rem;
+            gap: 15px;
+            padding: 0 10px;
         }
 
-        /* Botones */
-        .btn-group { display: flex; gap: 10px; }
+        .btn-group { display: flex; gap: 8px; }
 
         button {
-            padding: 10px 20px;
+            padding: 10px 18px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.2s;
+            transition: 0.2s;
         }
 
         .btn-load { background-color: var(--primary); color: white; }
-        .btn-load:hover { background-color: #1d4ed8; }
+        .btn-load:hover { background-color: #2563eb; }
 
-        .btn-raw { background-color: #475569; color: white; }
-        .btn-raw:hover { background-color: #64748b; }
+        .btn-raw { background-color: #4b5563; color: white; }
+        .btn-raw:hover { background-color: #6b7280; }
 
-        /* Área de resultados */
         #output {
             background: #000;
-            color: #10b981;
-            padding: 15px;
+            color: var(--accent);
+            padding: 20px;
             border-radius: 6px;
-            min-height: 100px;
+            min-height: 120px;
             white-space: pre-wrap;
-            font-family: 'Courier New', Courier, monospace;
-            border: 1px solid #1e293b;
+            font-family: 'Consolas', 'Monaco', monospace;
+            border: 1px solid #374151;
             margin-top: 20px;
+            line-height: 1.5;
         }
 
-        .url-debug {
+        .status-bar {
             font-size: 0.75rem;
-            color: #94a3b8;
+            color: #9ca3af;
             margin-top: 10px;
-            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Consulta Aeronáutica</h2>
+    <h2 style="margin-top:0">✈️ Aeronautical Data Viewer</h2>
     
     <div class="controls">
-        <input type="text" id="icao" placeholder="ICAO (Ej: GCXO)" maxlength="4">
+        <input type="text" id="icao" placeholder="ICAO" maxlength="4" value="GCXO">
         
         <select id="hours">
             <option value="0">Más reciente</option>
             <option value="2">Últimas 2h</option>
             <option value="6">Últimas 6h</option>
-            <option value="24">Últimas 24h</option>
         </select>
 
         <div class="checkbox-group">
-            <label><input type="checkbox" id="checkMetar" checked> METAR</label>
+            <label><input type="checkbox" id="checkMetar" checked disabled> METAR</label>
             <label><input type="checkbox" id="checkTaf"> TAF</label>
         </div>
 
@@ -129,48 +124,51 @@
         </div>
     </div>
 
-    <div id="output">// Los datos aparecerán aquí...</div>
-    <div id="urlDisplay" class="url-debug"></div>
+    <div id="output">Introduce un código ICAO y pulsa Cargar...</div>
+    <div class="status-bar">
+        <span id="urlDisplay">Esperando acción...</span>
+    </div>
 </div>
 
 <script>
     async function fetchData(isRawMode) {
         const icao = document.getElementById('icao').value.trim().toUpperCase();
         const hours = document.getElementById('hours').value;
-        const metarActive = document.getElementById('checkMetar').checked;
         const tafActive = document.getElementById('checkTaf').checked;
         const output = document.getElementById('output');
         const urlDisplay = document.getElementById('urlDisplay');
 
         if (!icao) {
-            alert("Por favor, introduce un código ICAO.");
+            alert("Introduce un código ICAO válido (ej. LEBL, GCXO).");
             return;
         }
 
-        // Construcción de la URL según lógica solicitada
-        // Nota: La API requiere IDs. Si METAR está off pero TAF on, la lógica de la URL cambia.
-        // Aquí seguimos tu regla: taf=true si el check TAF está activo.
-        const baseUrl = "https://aviationweather.gov/api/data/metar";
-        const url = `${baseUrl}?ids=${icao}&format=raw&taf=${tafActive}&hours=${hours}`;
+        // Construcción de la URL original
+        const targetUrl = `https://aviationweather.gov/api/data/metar?ids=${icao}&format=raw&taf=${tafActive}&hours=${hours}`;
         
-        urlDisplay.innerText = `Query URL: ${url}`;
-        output.innerText = "Cargando...";
+        // Uso de proxy para evitar error CORS
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        
+        urlDisplay.innerText = `Consultando: ${targetUrl}`;
+        output.innerText = "Consultando servidor meteorológico...";
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("Error en la respuesta del servidor");
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error("Error en la conexión.");
             
-            const data = await response.text();
+            const json = await response.json();
+            // AllOrigins devuelve el contenido en la propiedad 'contents'
+            const data = json.contents;
             
-            if (isRawMode) {
-                // En modo Raw mostramos el contenido tal cual
-                output.innerText = data || "No se encontraron datos.";
+            if (!data || data.trim() === "") {
+                output.innerText = "No hay datos disponibles para esta estación en este momento.";
             } else {
-                // En modo Cargar podríamos dar un formato extra o simplemente limpiar
-                output.innerText = data.trim() ? data : "Sin información disponible para este reporte.";
+                output.innerText = data;
             }
+
         } catch (error) {
-            output.innerText = "Error: " + error.message;
+            output.innerText = "Error: No se pudo conectar con el servicio. " + error.message;
+            console.error(error);
         }
     }
 </script>
