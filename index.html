@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviation Weather Tool</title>
+    <title>Aviation Weather Fetcher</title>
     <style>
         :root {
             --primary: #2563eb;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --border: #e2e8f0;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #38bdf8;
         }
 
         body {
@@ -24,46 +24,51 @@
         }
 
         .container {
-            background: var(--card);
+            background-color: var(--card);
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 800px;
         }
 
-        h2 { margin-top: 0; color: var(--primary); font-weight: 600; }
+        h2 { margin-top: 0; color: var(--accent); font-weight: 300; }
 
-        .toolbar {
+        /* Controles superiores */
+        .controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 15px;
             align-items: center;
-            padding: 20px;
-            background: #f1f5f9;
-            border-radius: 8px;
             margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
         }
 
         input[type="text"], select {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
+            padding: 10px;
             border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
             outline: none;
-            font-size: 14px;
         }
 
-        input[type="text"] { width: 120px; text-transform: uppercase; }
+        input[type="text"] { width: 120px; text-transform: uppercase; font-weight: bold; }
 
         .checkbox-group {
             display: flex;
             gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
+            align-items: center;
+            font-size: 0.9rem;
         }
 
+        /* Botones */
+        .btn-group { display: flex; gap: 10px; }
+
         button {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -71,43 +76,46 @@
             transition: all 0.2s;
         }
 
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        
-        .btn-secondary { background: #64748b; color: white; }
-        .btn-secondary:hover { background: #475569; }
+        .btn-load { background-color: var(--primary); color: white; }
+        .btn-load:hover { background-color: #1d4ed8; }
 
+        .btn-raw { background-color: #475569; color: white; }
+        .btn-raw:hover { background-color: #64748b; }
+
+        /* Área de resultados */
         #output {
-            width: 100%;
-            height: 300px;
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: #27272a;
+            background: #000;
             color: #10b981;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            resize: vertical;
+            padding: 15px;
+            border-radius: 6px;
+            min-height: 100px;
             white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #1e293b;
+            margin-top: 20px;
+        }
+
+        .url-debug {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Consulta Meteorológica Aeronáutica</h2>
+    <h2>Consulta Aeronáutica</h2>
     
-    <div class="toolbar">
-        <input type="text" id="icao" placeholder="Ej: GCXO" maxlength="4">
-
+    <div class="controls">
+        <input type="text" id="icao" placeholder="ICAO (Ej: GCXO)" maxlength="4">
+        
         <select id="hours">
             <option value="0">Más reciente</option>
-            <option value="1">Última hora</option>
-            <option value="3">Últimas 3 horas</option>
-            <option value="6">Últimas 6 horas</option>
-            <option value="12">Últimas 12 horas</option>
-            <option value="24">Últimas 24 horas</option>
+            <option value="2">Últimas 2h</option>
+            <option value="6">Últimas 6h</option>
+            <option value="24">Últimas 24h</option>
         </select>
 
         <div class="checkbox-group">
@@ -115,51 +123,54 @@
             <label><input type="checkbox" id="checkTaf"> TAF</label>
         </div>
 
-        <button class="btn-primary" onclick="fetchData()">Cargar</button>
-        <button class="btn-secondary" onclick="showUrl()">Raw (URL)</button>
+        <div class="btn-group">
+            <button class="btn-load" onclick="fetchData(false)">Cargar</button>
+            <button class="btn-raw" onclick="fetchData(true)">Raw</button>
+        </div>
     </div>
 
-    <textarea id="output" readonly placeholder="Los datos aparecerán aquí..."></textarea>
+    <div id="output">// Los datos aparecerán aquí...</div>
+    <div id="urlDisplay" class="url-debug"></div>
 </div>
 
 <script>
-    function buildUrl() {
-        const icao = document.getElementById('icao').value.toUpperCase().trim();
+    async function fetchData(isRawMode) {
+        const icao = document.getElementById('icao').value.trim().toUpperCase();
         const hours = document.getElementById('hours').value;
-        const tafActive = document.getElementById('checkTaf').checked;
         const metarActive = document.getElementById('checkMetar').checked;
+        const tafActive = document.getElementById('checkTaf').checked;
+        const output = document.getElementById('output');
+        const urlDisplay = document.getElementById('urlDisplay');
 
         if (!icao) {
             alert("Por favor, introduce un código ICAO.");
-            return null;
+            return;
         }
 
-        // Si METAR no está marcado pero TAF sí, la API requiere ajustes, 
-        // pero siguiendo tu lógica de ejemplo:
-        return `https://aviationweather.gov/api/data/metar?ids=${icao}&format=raw&taf=${tafActive}&hours=${hours}`;
-    }
-
-    async function fetchData() {
-        const url = buildUrl();
-        if (!url) return;
-
-        const output = document.getElementById('output');
-        output.value = "Cargando...";
+        // Construcción de la URL según lógica solicitada
+        // Nota: La API requiere IDs. Si METAR está off pero TAF on, la lógica de la URL cambia.
+        // Aquí seguimos tu regla: taf=true si el check TAF está activo.
+        const baseUrl = "https://aviationweather.gov/api/data/metar";
+        const url = `${baseUrl}?ids=${icao}&format=raw&taf=${tafActive}&hours=${hours}`;
+        
+        urlDisplay.innerText = `Query URL: ${url}`;
+        output.innerText = "Cargando...";
 
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error("Error en la respuesta del servidor");
+            
             const data = await response.text();
-            output.value = data || "No se encontraron datos para esta consulta.";
+            
+            if (isRawMode) {
+                // En modo Raw mostramos el contenido tal cual
+                output.innerText = data || "No se encontraron datos.";
+            } else {
+                // En modo Cargar podríamos dar un formato extra o simplemente limpiar
+                output.innerText = data.trim() ? data : "Sin información disponible para este reporte.";
+            }
         } catch (error) {
-            output.value = "Error: " + error.message;
-        }
-    }
-
-    function showUrl() {
-        const url = buildUrl();
-        if (url) {
-            document.getElementById('output').value = "URL de la consulta:\n" + url;
+            output.innerText = "Error: " + error.message;
         }
     }
 </script>
